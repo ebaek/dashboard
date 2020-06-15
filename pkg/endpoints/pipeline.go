@@ -200,7 +200,6 @@ func (r Resource) Rerun(name, namespace string) (*v1alpha1.PipelineRun, error) {
 	} else {
 		logging.Log.Debugf("Found the PipelineRun to rerun (%s in namespace %s)", name, namespace)
 	}
-
 	newPipelineRunData := pipelineRun
 	newPipelineRunData.Name = ""
 	newPipelineRunData.Spec.Status = ""

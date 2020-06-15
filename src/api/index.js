@@ -67,7 +67,7 @@ export function getKubeAPI(
 }
 
 export function getResourcesAPI(
-  { group, version, type, name = '', namespace },
+  { group, version, type, name = '', namespace, limit = '' },
   queryParams
 ) {
   return [
@@ -79,17 +79,24 @@ export function getResourcesAPI(
     type,
     '/',
     encodeURIComponent(name),
+    limit ? `?limit=${limit}` : '',
     queryParams ? `?${new URLSearchParams(queryParams).toString()}` : ''
   ].join('');
 }
 
 export function getTektonAPI(
   type,
-  { group = tektonAPIGroup, name = '', namespace, version = 'v1beta1' } = {},
+  {
+    group = tektonAPIGroup,
+    name = '',
+    namespace,
+    version = 'v1beta1',
+    limit
+  } = {},
   queryParams
 ) {
   return getResourcesAPI(
-    { group, version, type, name, namespace },
+    { group, version, type, name, namespace, limit },
     queryParams
   );
 }
@@ -127,13 +134,20 @@ export function getPipeline({ name, namespace }) {
   return get(uri);
 }
 
-export function getPipelineRuns({ filters = [], namespace } = {}) {
+export async function getPipelineRuns({
+  filters = [],
+  namespace,
+  limit = '5'
+} = {}) {
   const uri = getTektonAPI(
     'pipelineruns',
-    { namespace },
+    { namespace, limit },
     getQueryParams(filters)
   );
-  return get(uri).then(checkData);
+  const blob = await get(uri).then(checkData);
+  console.log(uri, blob);
+  return blob;
+  // return get(uri).then(checkData);
 }
 
 export function getPipelineRun({ name, namespace }) {
