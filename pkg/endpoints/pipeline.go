@@ -206,6 +206,7 @@ func (r Resource) Rerun(name, namespace string) (*v1alpha1.PipelineRun, error) {
 	theName := generateNewNameForRerun(name)
 	newPipelineRunData.GenerateName = theName
 	newPipelineRunData.ResourceVersion = ""
+	// newPipelineRunData.Continue = "123"
 
 	currentLabels := pipelineRun.GetLabels()
 

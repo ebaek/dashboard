@@ -67,7 +67,15 @@ export function getKubeAPI(
 }
 
 export function getResourcesAPI(
-  { group, version, type, name = '', namespace, limit = '' },
+  {
+    group,
+    version,
+    type,
+    name = '',
+    namespace,
+    limit = '',
+    continueToken = ''
+  },
   queryParams
 ) {
   return [
@@ -80,6 +88,7 @@ export function getResourcesAPI(
     '/',
     encodeURIComponent(name),
     limit ? `?limit=${limit}` : '',
+    continueToken ? `&continue=${continueToken}` : '',
     queryParams ? `?${new URLSearchParams(queryParams).toString()}` : ''
   ].join('');
 }
@@ -91,12 +100,13 @@ export function getTektonAPI(
     name = '',
     namespace,
     version = 'v1beta1',
-    limit
+    limit,
+    continueToken
   } = {},
   queryParams
 ) {
   return getResourcesAPI(
-    { group, version, type, name, namespace, limit },
+    { group, version, type, name, namespace, limit, continueToken },
     queryParams
   );
 }
@@ -116,7 +126,8 @@ export function getWebSocketURL() {
 
 export function checkData(data) {
   if (data.items) {
-    return data.items;
+    // return Object in order to include continue token
+    return data;
   }
 
   const error = new Error('Unable to retrieve data');
@@ -137,11 +148,12 @@ export function getPipeline({ name, namespace }) {
 export async function getPipelineRuns({
   filters = [],
   namespace,
-  limit = '5'
+  limit = '5',
+  continueToken = ''
 } = {}) {
   const uri = getTektonAPI(
     'pipelineruns',
-    { namespace, limit },
+    { namespace, limit, continueToken },
     getQueryParams(filters)
   );
   const blob = await get(uri).then(checkData);
