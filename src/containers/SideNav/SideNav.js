@@ -172,7 +172,7 @@ class SideNav extends Component {
               icon={<span />}
               to={this.getPath(urls.pipelines.all())}
             >
-              Pipelines test
+              Pipelines TEST 1
             </SideNavMenuItem>
             <SideNavMenuItem
               element={NavLink}
