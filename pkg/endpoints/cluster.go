@@ -53,7 +53,7 @@ var secretsURIPattern *regexp.Regexp = regexp.MustCompile("/secrets[?/]")
 
 // ProxyRequest does as the name suggests: proxies requests and logs what's going on
 func (r Resource) ProxyRequest(request *restful.Request, response *restful.Response) {
-	logging.Log.Debug("hello world")
+	logging.Log.Info("hello world")
 	parsedURL, err := url.Parse(request.Request.URL.String())
 	if err != nil {
 		utils.RespondError(response, err, http.StatusNotFound)
