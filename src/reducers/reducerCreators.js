@@ -35,10 +35,18 @@ function createByIdReducer({ type }) {
         delete newState[action.payload.metadata.uid];
         return newState;
       case `${typePlural}_FETCH_SUCCESS`:
+        const itemsWithContinueToken = action.data.items.map(resource => {
+          const withToken = Object.assign({}, resource);
+          withToken.metadata.continue = action.data.metadata.continue;
+          return withToken;
+        });
+
         return {
           ...state,
           ...keyBy(
-            action.data.filter(resource => !isStale(resource, state)),
+            itemsWithContinueToken.filter(
+              resource => !isStale(resource, state)
+            ),
             'metadata.uid'
           )
         };
@@ -70,7 +78,7 @@ function createByNamespaceReducer({ type }) {
         ];
         return newState;
       case `${typePlural}_FETCH_SUCCESS`:
-        const namespaces = action.data.reduce(
+        const namespaces = action.data.items.reduce(
           (accumulator, pipelineResource) => {
             const { name, namespace, uid } = pipelineResource.metadata;
             return merge(accumulator, {

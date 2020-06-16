@@ -16,7 +16,7 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
 import isEqual from 'lodash.isequal';
-import { InlineNotification } from 'carbon-components-react';
+import { Button, InlineNotification } from 'carbon-components-react';
 import { PipelineRuns as PipelineRunsList } from '@tektoncd/dashboard-components';
 import {
   getErrorMessage,
@@ -49,7 +49,8 @@ import {
 const initialState = {
   showCreatePipelineRunModal: false,
   createdPipelineRun: null,
-  submitError: ''
+  submitError: '',
+  continueToken: ''
 };
 
 export /* istanbul ignore next */ class PipelineRuns extends Component {
@@ -76,6 +77,7 @@ export /* istanbul ignore next */ class PipelineRuns extends Component {
       webSocketConnected: prevWebSocketConnected
     } = prevProps;
 
+    console.log('changing stuff');
     if (namespace !== prevNamespace || !isEqual(filters, prevFilters)) {
       this.reset();
       this.fetchPipelineRuns();
@@ -220,11 +222,21 @@ export /* istanbul ignore next */ class PipelineRuns extends Component {
   }
 
   fetchPipelineRuns() {
-    const { filters, namespace } = this.props;
-    this.props.fetchPipelineRuns({
-      filters,
-      namespace
-    });
+    const { filters, namespace, limit } = this.props;
+    const { continueToken } = this.state;
+
+    this.props
+      .fetchPipelineRuns({
+        filters,
+        namespace,
+        limit,
+        continueToken
+      })
+      .then(pipelineRuns => {
+        if (pipelineRuns && pipelineRuns.metadata) {
+          this.setState({ continueToken: pipelineRuns.metadata.continue });
+        }
+      });
   }
 
   render() {
@@ -235,7 +247,6 @@ export /* istanbul ignore next */ class PipelineRuns extends Component {
       pipelineRuns,
       intl
     } = this.props;
-
     if (error) {
       return (
         <InlineNotification
@@ -319,6 +330,21 @@ export /* istanbul ignore next */ class PipelineRuns extends Component {
           selectedNamespace={selectedNamespace}
           toolbarButtons={toolbarButtons}
         />
+
+        <Button
+          as="p"
+          className="some-class"
+          disabled={false}
+          href="#"
+          iconDescription="Load More Button"
+          kind="ghost"
+          onClick={() => this.fetchPipelineRuns()}
+          // onFocus={function noRefCheck() {}}
+          size="default"
+          type="button"
+        >
+          Load More
+        </Button>
       </>
     );
   }
