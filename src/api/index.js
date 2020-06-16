@@ -127,7 +127,10 @@ export function getWebSocketURL() {
 export function checkData(data) {
   if (data.items) {
     // return Object in order to include continue token
-    return data;
+    return {
+      items: data.items,
+      metadata: data.metadata
+    };
   }
 
   const error = new Error('Unable to retrieve data');
@@ -156,10 +159,8 @@ export async function getPipelineRuns({
     { namespace, limit, continueToken },
     getQueryParams(filters)
   );
-  const blob = await get(uri).then(checkData);
-  console.log(uri, blob);
-  return blob;
-  // return get(uri).then(checkData);
+
+  return get(uri).then(checkData);
 }
 
 export function getPipelineRun({ name, namespace }) {
