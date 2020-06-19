@@ -16,7 +16,11 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
 import isEqual from 'lodash.isequal';
-import { Button, InlineNotification } from 'carbon-components-react';
+import {
+  Button,
+  InlineLoading,
+  InlineNotification
+} from 'carbon-components-react';
 import { PipelineRuns as PipelineRunsList } from '@tektoncd/dashboard-components';
 import {
   getErrorMessage,
@@ -33,6 +37,7 @@ import { sortRunsByStartTime } from '../../utils';
 import { fetchPipelineRuns } from '../../actions/pipelineRuns';
 
 import {
+  fetchedAllPipelineRunsChunks,
   getPipelineRuns,
   getPipelineRunsErrorMessage,
   getSelectedNamespace,
@@ -50,7 +55,8 @@ const initialState = {
   showCreatePipelineRunModal: false,
   createdPipelineRun: null,
   submitError: '',
-  continueToken: ''
+  continueToken: '',
+  loadingPipelineRuns: false
 };
 
 export /* istanbul ignore next */ class PipelineRuns extends Component {
@@ -77,7 +83,6 @@ export /* istanbul ignore next */ class PipelineRuns extends Component {
       webSocketConnected: prevWebSocketConnected
     } = prevProps;
 
-    console.log('changing stuff');
     if (namespace !== prevNamespace || !isEqual(filters, prevFilters)) {
       this.reset();
       this.fetchPipelineRuns();
@@ -222,21 +227,26 @@ export /* istanbul ignore next */ class PipelineRuns extends Component {
   }
 
   fetchPipelineRuns() {
-    const { filters, namespace, limit } = this.props;
+    const { filters, namespace, limit, allChunksFetched } = this.props;
     const { continueToken } = this.state;
-
-    this.props
-      .fetchPipelineRuns({
-        filters,
-        namespace,
-        limit,
-        continueToken
-      })
-      .then(pipelineRuns => {
-        if (pipelineRuns && pipelineRuns.metadata) {
-          this.setState({ continueToken: pipelineRuns.metadata.continue });
-        }
-      });
+    if (!allChunksFetched) {
+      this.setState({ loadingPipelineRuns: true });
+      this.props
+        .fetchPipelineRuns({
+          filters,
+          namespace,
+          limit,
+          continueToken
+        })
+        .then(morePipelineRuns => {
+          if (morePipelineRuns) {
+            this.setState({
+              continueToken: morePipelineRuns.metadata.continue
+            });
+            this.setState({ loadingPipelineRuns: false });
+          }
+        });
+    }
   }
 
   render() {
@@ -245,6 +255,7 @@ export /* istanbul ignore next */ class PipelineRuns extends Component {
       loading,
       namespace: selectedNamespace,
       pipelineRuns,
+      allChunksFetched,
       intl
     } = this.props;
     if (error) {
@@ -331,20 +342,29 @@ export /* istanbul ignore next */ class PipelineRuns extends Component {
           toolbarButtons={toolbarButtons}
         />
 
-        <Button
-          as="p"
-          className="some-class"
-          disabled={false}
-          href="#"
-          iconDescription="Load More Button"
-          kind="ghost"
-          onClick={() => this.fetchPipelineRuns()}
-          // onFocus={function noRefCheck() {}}
-          size="default"
-          type="button"
-        >
-          Load More
-        </Button>
+        {!allChunksFetched && (
+          <div style={{ float: 'right' }}>
+            {this.state.loadingPipelineRuns ? (
+              <InlineLoading
+                status="active"
+                iconDescription="Active loading indicator"
+                description="Loading PipelineRuns..."
+              />
+            ) : (
+              <Button
+                as="p"
+                href="#"
+                iconDescription="Load More Button"
+                kind="ghost"
+                onClick={() => this.fetchPipelineRuns()}
+                size="default"
+                type="button"
+              >
+                Load More
+              </Button>
+            )}
+          </div>
+        )}
       </>
     );
   }
@@ -375,7 +395,8 @@ function mapStateToProps(state, props) {
       filters,
       namespace
     }),
-    webSocketConnected: isWebSocketConnected(state)
+    webSocketConnected: isWebSocketConnected(state),
+    allChunksFetched: fetchedAllPipelineRunsChunks(state)
   };
 }
 

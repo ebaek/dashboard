@@ -100,8 +100,8 @@ export function getTektonAPI(
     name = '',
     namespace,
     version = 'v1beta1',
-    limit,
-    continueToken
+    limit = '',
+    continueToken = ''
   } = {},
   queryParams
 ) {
@@ -151,7 +151,7 @@ export function getPipeline({ name, namespace }) {
 export async function getPipelineRuns({
   filters = [],
   namespace,
-  limit = '5',
+  limit = '50',
   continueToken = ''
 } = {}) {
   const uri = getTektonAPI(

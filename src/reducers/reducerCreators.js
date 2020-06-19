@@ -35,18 +35,18 @@ function createByIdReducer({ type }) {
         delete newState[action.payload.metadata.uid];
         return newState;
       case `${typePlural}_FETCH_SUCCESS`:
-        const itemsWithContinueToken = action.data.items.map(resource => {
-          const withToken = Object.assign({}, resource);
-          withToken.metadata.continue = action.data.metadata.continue;
-          return withToken;
-        });
+        const data = action.data.items
+          ? action.data.items.map(resource => {
+              const withToken = Object.assign({}, resource);
+              withToken.metadata.continue = action.data.metadata.continue;
+              return withToken;
+            })
+          : action.data;
 
         return {
           ...state,
           ...keyBy(
-            itemsWithContinueToken.filter(
-              resource => !isStale(resource, state)
-            ),
+            data.filter(resource => !isStale(resource, state)),
             'metadata.uid'
           )
         };
@@ -97,6 +97,21 @@ function createByNamespaceReducer({ type }) {
   };
 }
 
+export function createFetchedAllChunksReducer({ type }) {
+  const typePlural = typeToPlural(type);
+  return function fetchedAllChunks(state = false, action) {
+    switch (action.type) {
+      case `${typePlural}_FETCH_SUCCESS`:
+        return action.data.metadata.continue === '';
+      case `${typePlural}_FETCH_REQUEST`:
+      case `${typePlural}_FETCH_FAILURE`:
+        return false;
+      default:
+        return state;
+    }
+  };
+}
+
 export function createIsFetchingReducer({ type }) {
   const typePlural = typeToPlural(type);
   return function isFetching(state = false, action) {
@@ -132,6 +147,7 @@ export function createNamespacedReducer({ type }) {
     byId: createByIdReducer({ type }),
     byNamespace: createByNamespaceReducer({ type }),
     errorMessage: createErrorMessageReducer({ type }),
-    isFetching: createIsFetchingReducer({ type })
+    isFetching: createIsFetchingReducer({ type }),
+    fetchedAllChunks: createFetchedAllChunksReducer({ type })
   });
 }

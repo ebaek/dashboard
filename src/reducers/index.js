@@ -212,6 +212,10 @@ export function isFetchingPipelineRuns(state) {
   return pipelineRunsSelectors.isFetchingPipelineRuns(state.pipelineRuns);
 }
 
+export function fetchedAllPipelineRunsChunks(state) {
+  return pipelineRunsSelectors.fetchedAllPipelineRunsChunks(state.pipelineRuns);
+}
+
 export function getTaskRun(
   state,
   { name, namespace = getSelectedNamespace(state) }
