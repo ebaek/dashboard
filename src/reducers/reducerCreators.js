@@ -118,10 +118,12 @@ export function createFetchedAllChunksReducer({ type }) {
   return function fetchedAllChunks(state = null, action) {
     switch (action.type) {
       case `${typePlural}_FETCH_SUCCESS`:
-        if (state || action.data.metadata === undefined) {
+        if (state === 'DONE' || action.data.metadata === undefined) {
           return state;
         }
-        return action.data.metadata.continue === '';
+        return action.data.metadata.continue === ''
+          ? 'DONE'
+          : action.data.metadata.continue;
       case `${typePlural}_FETCH_REQUEST`:
       case `${typePlural}_FETCH_FAILURE`:
       default:

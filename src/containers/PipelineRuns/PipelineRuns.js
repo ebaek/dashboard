@@ -55,7 +55,6 @@ const initialState = {
   showCreatePipelineRunModal: false,
   createdPipelineRun: null,
   submitError: '',
-  continueToken: '',
   loadingPipelineRuns: false
 };
 
@@ -228,21 +227,18 @@ export /* istanbul ignore next */ class PipelineRuns extends Component {
 
   fetchPipelineRuns() {
     const { filters, namespace, limit, allChunksFetched } = this.props;
-    const { continueToken } = this.state;
-    if (!allChunksFetched) {
+    console.log(allChunksFetched);
+    if (allChunksFetched !== 'DONE') {
       this.setState({ loadingPipelineRuns: true });
       this.props
         .fetchPipelineRuns({
           filters,
           namespace,
           limit,
-          continueToken
+          continueToken: allChunksFetched
         })
         .then(morePipelineRuns => {
           if (morePipelineRuns) {
-            this.setState({
-              continueToken: morePipelineRuns.metadata.continue
-            });
             this.setState({ loadingPipelineRuns: false });
           }
         });
@@ -342,7 +338,7 @@ export /* istanbul ignore next */ class PipelineRuns extends Component {
           toolbarButtons={toolbarButtons}
         />
 
-        {!allChunksFetched && (
+        {allChunksFetched !== 'DONE' && (
           <div style={{ float: 'right' }}>
             {this.state.loadingPipelineRuns ? (
               <InlineLoading
