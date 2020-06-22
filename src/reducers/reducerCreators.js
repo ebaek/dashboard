@@ -38,7 +38,9 @@ function createByIdReducer({ type }) {
         const data = action.data.items
           ? action.data.items.map(resource => {
               const withToken = Object.assign({}, resource);
-              withToken.metadata.continue = action.data.metadata.continue;
+              withToken.metadata.continue = action.data.metadata.continue
+                ? action.data.metadata.continue
+                : 'DONE';
               return withToken;
             })
           : action.data;
@@ -78,34 +80,18 @@ function createByNamespaceReducer({ type }) {
         ];
         return newState;
       case `${typePlural}_FETCH_SUCCESS`:
-        const namespaces = action.data.items.reduce(
-          (accumulator, pipelineResource) => {
-            const { name, namespace, uid } = pipelineResource.metadata;
-            return merge(accumulator, {
-              [namespace]: {
-                [name]: uid
-              }
-            });
-          },
-          {}
-        );
+        const data = action.data.items ? action.data.items : action.data;
+
+        const namespaces = data.reduce((accumulator, pipelineResource) => {
+          const { name, namespace, uid } = pipelineResource.metadata;
+          return merge(accumulator, {
+            [namespace]: {
+              [name]: uid
+            }
+          });
+        }, {});
 
         return merge({}, state, namespaces);
-      default:
-        return state;
-    }
-  };
-}
-
-export function createFetchedAllChunksReducer({ type }) {
-  const typePlural = typeToPlural(type);
-  return function fetchedAllChunks(state = false, action) {
-    switch (action.type) {
-      case `${typePlural}_FETCH_SUCCESS`:
-        return action.data.metadata.continue === '';
-      case `${typePlural}_FETCH_REQUEST`:
-      case `${typePlural}_FETCH_FAILURE`:
-        return false;
       default:
         return state;
     }
@@ -121,6 +107,23 @@ export function createIsFetchingReducer({ type }) {
       case `${typePlural}_FETCH_SUCCESS`:
       case `${typePlural}_FETCH_FAILURE`:
         return false;
+      default:
+        return state;
+    }
+  };
+}
+
+export function createFetchedAllChunksReducer({ type }) {
+  const typePlural = typeToPlural(type);
+  return function fetchedAllChunks(state = null, action) {
+    switch (action.type) {
+      case `${typePlural}_FETCH_SUCCESS`:
+        if (state || action.data.metadata === undefined) {
+          return state;
+        }
+        return action.data.metadata.continue === '';
+      case `${typePlural}_FETCH_REQUEST`:
+      case `${typePlural}_FETCH_FAILURE`:
       default:
         return state;
     }

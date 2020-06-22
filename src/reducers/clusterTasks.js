@@ -34,7 +34,7 @@ function byName(state = {}, action) {
       delete newState[action.payload.metadata.name];
       return newState;
     case 'CLUSTER_TASKS_FETCH_SUCCESS':
-      const clusterTasks = action.data.map(clusterTask => {
+      const clusterTasks = action.data.items.map(clusterTask => {
         if (isStale(clusterTask, state, 'name')) {
           return state[clusterTask.metadata.name];
         }
