@@ -37,7 +37,7 @@ import { sortRunsByStartTime } from '../../utils';
 import { fetchPipelineRuns } from '../../actions/pipelineRuns';
 
 import {
-  fetchedAllPipelineRunsChunks,
+  fetchedPipelineRunsContinueToken,
   getPipelineRuns,
   getPipelineRunsErrorMessage,
   getSelectedNamespace,
@@ -226,16 +226,15 @@ export /* istanbul ignore next */ class PipelineRuns extends Component {
   }
 
   fetchPipelineRuns() {
-    const { filters, namespace, limit, allChunksFetched } = this.props;
-    console.log(allChunksFetched);
-    if (allChunksFetched !== 'DONE') {
+    const { filters, namespace, limit, continueToken } = this.props;
+    if (continueToken !== 'DONE') {
       this.setState({ loadingPipelineRuns: true });
       this.props
         .fetchPipelineRuns({
           filters,
           namespace,
           limit,
-          continueToken: allChunksFetched
+          continueToken
         })
         .then(morePipelineRuns => {
           if (morePipelineRuns) {
@@ -251,7 +250,7 @@ export /* istanbul ignore next */ class PipelineRuns extends Component {
       loading,
       namespace: selectedNamespace,
       pipelineRuns,
-      allChunksFetched,
+      continueToken,
       intl
     } = this.props;
     if (error) {
@@ -338,7 +337,7 @@ export /* istanbul ignore next */ class PipelineRuns extends Component {
           toolbarButtons={toolbarButtons}
         />
 
-        {allChunksFetched !== 'DONE' && (
+        {continueToken !== 'DONE' && (
           <div style={{ float: 'right' }}>
             {this.state.loadingPipelineRuns ? (
               <InlineLoading
@@ -392,7 +391,7 @@ function mapStateToProps(state, props) {
       namespace
     }),
     webSocketConnected: isWebSocketConnected(state),
-    allChunksFetched: fetchedAllPipelineRunsChunks(state)
+    continueToken: fetchedPipelineRunsContinueToken(state)
   };
 }
 

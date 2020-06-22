@@ -32,6 +32,6 @@ export function isFetchingPipelineRuns(state) {
   return state.isFetching;
 }
 
-export function fetchedAllPipelineRunsChunks(state) {
-  return state.fetchedAllChunks;
+export function fetchedPipelineRunsContinueToken(state) {
+  return state.fetchedContinueToken;
 }

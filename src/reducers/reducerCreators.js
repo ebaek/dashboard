@@ -113,9 +113,9 @@ export function createIsFetchingReducer({ type }) {
   };
 }
 
-export function createFetchedAllChunksReducer({ type }) {
+export function createFetchContinueTokenReducer({ type }) {
   const typePlural = typeToPlural(type);
-  return function fetchedAllChunks(state = null, action) {
+  return function fetchedContinueToken(state = null, action) {
     switch (action.type) {
       case `${typePlural}_FETCH_SUCCESS`:
         if (state === 'DONE' || action.data.metadata === undefined) {
@@ -153,6 +153,6 @@ export function createNamespacedReducer({ type }) {
     byNamespace: createByNamespaceReducer({ type }),
     errorMessage: createErrorMessageReducer({ type }),
     isFetching: createIsFetchingReducer({ type }),
-    fetchedAllChunks: createFetchedAllChunksReducer({ type })
+    fetchedContinueToken: createFetchContinueTokenReducer({ type })
   });
 }

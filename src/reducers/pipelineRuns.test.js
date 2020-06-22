@@ -56,9 +56,9 @@ it('isFetchingPipelineRuns', () => {
   expect(selectors.isFetchingPipelineRuns({ isFetching })).toEqual(isFetching);
 });
 
-it('fetchedAllPipelineRunsChunks', () => {
-  const fetchedAllChunks = 'fetchedAllChunks';
-  expect(selectors.fetchedAllPipelineRunsChunks({ fetchedAllChunks })).toEqual(
-    fetchedAllChunks
-  );
+it('fetchedPipelineRunsContinueToken', () => {
+  const fetchedContinueToken = 'fetchedContinueToken';
+  expect(
+    selectors.fetchedPipelineRunsContinueToken({ fetchedContinueToken })
+  ).toEqual(fetchedContinueToken);
 });
