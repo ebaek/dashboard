@@ -55,3 +55,10 @@ it('isFetchingPipelineRuns', () => {
   const isFetching = 'isFetching';
   expect(selectors.isFetchingPipelineRuns({ isFetching })).toEqual(isFetching);
 });
+
+it('fetchedAllPipelineRunsChunks', () => {
+  const fetchedAllChunks = 'fetchedAllChunks';
+  expect(selectors.fetchedAllPipelineRunsChunks({ fetchedAllChunks })).toEqual(
+    fetchedAllChunks
+  );
+});
